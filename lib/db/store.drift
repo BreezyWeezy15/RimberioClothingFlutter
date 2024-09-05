@@ -1,0 +1,14 @@
+
+
+
+CREATE TABLE store(
+  id INT NOT NULL PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  category TEXT,
+  price DOUBLE,
+  totalPrice DOUBLE,
+  image TEXT,
+  quantity INTEGER,
+  description TEXT,
+  color INTEGER
+)

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "393168671411",
+    "project_id": "rimberio-296b9",
+    "storage_bucket": "rimberio-296b9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393168671411:android:4a40bd6755aea41b3f56c6",
+        "android_client_info": {
+          "package_name": "com.car.car_shop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDimH8BIv-JCmNnmUUtC9KU57r0VRhXHz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
