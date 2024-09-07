@@ -62,6 +62,14 @@ class Utils {
     'Spanish'
   ];
 
+  static final List<String> languagesIso = [
+    'en',
+    'fr',
+    'es'
+  ];
+
+
+
   static final List<String> flags = [
     "assets/images/english.png",
     "assets/images/french.png",

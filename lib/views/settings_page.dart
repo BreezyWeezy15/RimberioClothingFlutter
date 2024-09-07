@@ -1,5 +1,12 @@
+import 'package:car_shop/bloc/app_bloc.dart';
+import 'package:car_shop/bloc/app_event.dart';
+import 'package:car_shop/json/locale_keys.g.dart';
 import 'package:car_shop/others/utils.dart';
+import 'package:car_shop/storage/storage_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart' hide Trans;
+import 'package:easy_localization/easy_localization.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,9 +17,21 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
+  ThemeMode themeMode = ThemeMode.light;
   bool isDark = false;
   int selectedPos = 0;
   int paymentPos = 0;
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    isDark = StorageHelper.getMode();
+    print("Language is ${StorageHelper.getLanguage()}");
+    print("Payment is ${StorageHelper.getPaymentMethod()}");
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +41,11 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Row(
               children: [
-                IconButton(onPressed: (){}, icon: const Icon(Icons.arrow_back,
+                IconButton(onPressed: (){
+                  Get.back();
+                }, icon: const Icon(Icons.arrow_back,
                 size: 30,)),
-                Text("Settings",style: Utils.getBold().copyWith(fontSize: 20),)
+                Text(LocaleKeys.settings.tr(),style: Utils.getBold().copyWith(fontSize: 20),)
               ],
             ),
             const Divider(),
@@ -32,13 +53,17 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.only(left: 20,right: 20,top: 20),
               child: Row(
                 children: [
-                  Text("Theme",style: Utils.getBold().copyWith(fontSize: 20),),
+                  Text(LocaleKeys.theme.tr(),style: Utils.getBold().copyWith(fontSize: 20),),
                   const Spacer(),
                   Switch(value: isDark, onChanged: (value){
 
                     setState(() {
                       isDark = value;
+                      isDark ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
                     });
+                    StorageHelper.setMode(isDark);
+                    Get.changeThemeMode(themeMode);
+                    BlocProvider.of<AppBloc>(context).add(GetThemeEvent(themeMode));
 
                   })
                 ],
@@ -49,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
                padding: const EdgeInsets.only(left: 20,right: 20,top: 5),
               child: Row(
                 children: [
-                  Text("Language",style: Utils.getBold().copyWith(fontSize: 20),),
+                  Text(LocaleKeys.language.tr(),style: Utils.getBold().copyWith(fontSize: 20),),
                   const Spacer(),
                   IconButton(onPressed: (){
 
@@ -67,13 +92,17 @@ class _SettingsPageState extends State<SettingsPage> {
                                     const SizedBox(width: 10,),
                                     Text(Utils.languages[index],style: Utils.getBold().copyWith(fontSize: 20),),
                                     const Spacer(),
-                                    Radio(
+                                    Radio<int>(
                                         value: index,
                                         groupValue: selectedPos,
-                                        onChanged: (value){
+                                        onChanged: (int? value) async {
                                           setState(() {
                                             selectedPos = value!;
                                           });
+                                          StorageHelper.setLanguage(Utils.languagesIso[index]);
+                                          await context.setLocale(Locale(Utils.languagesIso[index]));
+                                          Get.updateLocale(Locale(Utils.languagesIso[index]));
+                                          if(context.mounted) Navigator.pop(context);
                                         })
                                   ],
                                 );
@@ -91,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.only(left: 20,right: 20,top: 5),
               child: Row(
                 children: [
-                  Text("Payment Method",style: Utils.getBold().copyWith(fontSize: 20),),
+                  Text(LocaleKeys.paymentMethod.tr(),style: Utils.getBold().copyWith(fontSize: 20),),
                   const Spacer(),
                   IconButton(onPressed: (){
 
@@ -113,6 +142,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                           setState(() {
                                             paymentPos = value!;
                                           });
+                                          StorageHelper.setPaymentMethod(Utils.payments[index]);
+                                          Navigator.pop(context);
+
                                         })
                                   ],
                                 );
@@ -130,7 +162,7 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.only(left: 20,right: 20,top: 5),
               child: Row(
                 children: [
-                  Text("Feedback",style: Utils.getBold().copyWith(fontSize: 20),),
+                  Text(LocaleKeys.feedback.tr(),style: Utils.getBold().copyWith(fontSize: 20),),
                   const Spacer(),
                   IconButton(onPressed: (){}, icon: const Icon(Icons.feedback))
                 ],

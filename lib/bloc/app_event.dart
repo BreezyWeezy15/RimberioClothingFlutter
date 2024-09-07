@@ -1,6 +1,8 @@
 
 
 import 'package:car_shop/views/register_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../db/store_helper.dart';
 
@@ -70,4 +72,19 @@ class GetDeleteCartItemEvent extends AppEvent {
 
 class GetDeleteCartEvent extends AppEvent {
 
+}
+
+class GetUpdateCartEvent extends AppEvent {
+  StoreCompanion companion;
+  GetUpdateCartEvent(this.companion);
+}
+
+class GetTotalPriceEvent extends AppEvent {
+
+}
+
+///////
+class GetThemeEvent extends AppEvent {
+  ThemeMode themeMode;
+  GetThemeEvent(this.themeMode);
 }

@@ -79,3 +79,20 @@ class GetDeleteCartState extends AppState {
   int result;
   GetDeleteCartState(this.result);
 }
+
+class GetTotalPriceState extends AppState {
+  double totalPrice;
+  GetTotalPriceState(this.totalPrice);
+}
+
+class GetUpdateCartState extends AppState {
+  int result;
+  GetUpdateCartState(this.result);
+}
+
+class GetThemeState extends AppState {
+  ThemeMode themeMode;
+  GetThemeState(this.themeMode);
+}
+
+

@@ -40,9 +40,36 @@ class StoreHelper extends _$StoreHelper {
   }
 
   Future<int> updateCart(StoreCompanion companion) async {
-    return await update(store).write(StoreCompanion(
-      id: companion.id,
+    return await (update(store)
+      ..where((tbl) => tbl.id.equals(companion.id.value)))
+        .write(StoreCompanion(
+      title: companion.title,
+      color: companion.color,
+      category: companion.category,
+      image: companion.image,
+      description: companion.description,
+      totalPrice: companion.totalPrice,
+      quantity: companion.quantity,
     ));
+  }
+
+  Future<double> getTotalPrice() async {
+    // Define the SQL query to compute the total price
+    final query = customSelect(
+      'SELECT COALESCE(SUM(totalPrice), 0) AS total_price FROM store',
+      readsFrom: {store},
+    );
+
+    // Run the query and get the result
+    final result = await query.get();
+    if (result.isEmpty) {
+      return 0.0;
+    }
+
+    // Extract the total price from the result
+    final row = result.first;
+    final totalPrice = row.readDouble('total_price') ?? 0.0;
+    return totalPrice;
   }
 }
 

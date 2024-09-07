@@ -1,11 +1,11 @@
 
-import 'dart:async';
 
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
+import 'package:car_shop/others/theme_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../auth/api_service.dart';
 
 class AppBloc extends Bloc<AppEvent,AppState> {
@@ -19,6 +19,7 @@ class AppBloc extends Bloc<AppEvent,AppState> {
     on<ResetEvent>((event, emit) => _resetUser(event, emit));
     on<AuthEvent>((event, emit) => _getStatus(event, emit));
     on<UserInfoEvent>((event, emit) => _getUserInfo(event, emit));
+    on<GetThemeEvent>((event, emit) => _changeTheme(event, emit));
   }
 
   _loginUser(LoginEvent event,Emitter<AppState> emit) async {
@@ -71,6 +72,13 @@ class AppBloc extends Bloc<AppEvent,AppState> {
   }
   _getUserInfo(UserInfoEvent event, Emitter<AppState> emit) async {
     emit(UserInfoState(await authService.getUser()));
+  }
+
+
+  //
+  _changeTheme(GetThemeEvent event,Emitter<AppState> emit) {
+     ThemeMode themeMode = ThemeHelper.getTheme();
+     emit(GetThemeState(themeMode));
   }
 
 }

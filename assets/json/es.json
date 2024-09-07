@@ -1,0 +1,17 @@
+{
+    "categories": "Categorías",
+    "settings": "Configuración",
+    "theme": "Tema",
+    "language": "Idioma",
+    "paymentMethod": "Método de Pago",
+    "feedback": "Comentarios",
+    "productInfo": "Información del Producto",
+    "payNow": "Pagar Ahora",
+    "due": "A Pagar",
+    "checkout": "Pagar",
+    "cart": "Carrito",
+    "electronics": "Electrónica",
+    "jewelry": "Joyería",
+    "menClothing": "Ropa para Hombres",
+    "womenClothing": "Ropa para Mujeres"
+}

@@ -3,7 +3,6 @@
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/storage/storage_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../auth/product_service.dart';
 import '../db/store_helper.dart';
 import '../models/product.dart';
@@ -21,6 +20,8 @@ class ProductBloc extends Bloc<AppEvent,AppState> {
     on<GetSaveCartEvent>((event,emit) => _saveCart(event, emit));
     on<GetDeleteCartItemEvent>((event,emit) => _deleteCartItem(event, emit));
     on<GetDeleteCartEvent>((event,emit) => _deleteCart(event, emit));
+    on<GetTotalPriceEvent>((event,emit) => _getTotalPrice(event, emit));
+    on<GetUpdateCartEvent>((event,emit) => _updateCart(event, emit));
   }
 
   _getProducts(GetProductsEvent event,Emitter<AppState> emit) async {
@@ -76,6 +77,16 @@ class ProductBloc extends Bloc<AppEvent,AppState> {
     } catch (e) {
       emit(ERROR(e.toString()));
     }
+  }
+
+  _updateCart(GetUpdateCartEvent event, Emitter<AppState> emit) async {
+    int result = await storeHelper.updateCart(event.companion);  // Replace with your actual service method
+    emit(GetUpdateCartState(result));
+  }
+
+  _getTotalPrice(GetTotalPriceEvent event, Emitter<AppState> emit) async {
+    double result = await storeHelper.getTotalPrice();  // Replace with your actual service method
+    emit(GetTotalPriceState(result));
   }
 
 }

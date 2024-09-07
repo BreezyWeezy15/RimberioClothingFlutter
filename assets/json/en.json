@@ -1,0 +1,17 @@
+{
+    "categories" : "Categories",
+    "settings" : "Settings",
+    "theme" : "Theme",
+    "language" : "Language",
+    "paymentMethod" : "Payment Method",
+    "feedback" : "Feedback",
+    "productInfo" : "ProductInfo",
+    "payNow" : "Pay Now",
+    "due" : "Due",
+    "checkout" : "Checkout",
+    "cart" : "Cart",
+    "electronics" : "Electronics",
+    "jewelry" : "Jewelry",
+    "menClothing" : "Men's Clothing",
+    "womenClothing" : "Women's Clothing"
+}
