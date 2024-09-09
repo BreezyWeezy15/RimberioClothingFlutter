@@ -28,8 +28,6 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
 
     isDark = StorageHelper.getMode();
-    print("Language is ${StorageHelper.getLanguage()}");
-    print("Payment is ${StorageHelper.getPaymentMethod()}");
 
   }
 

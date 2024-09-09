@@ -1,3 +1,8 @@
+
+
+import 'package:car_shop/payment/paypal_payment_helper.dart';
+import 'package:car_shop/routes/app_routing.dart';
+import 'package:car_shop/storage/storage_helper.dart';
 import 'package:drift/drift.dart' as d;
 import 'package:car_shop/json/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -21,6 +26,110 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+
+  String? paymentMethod = "Stripe";
+  String? checkoutUrl;
+  String? executeUrl;
+  String? accessToken;
+  late PayPalPaymentHelper _payPalPaymentHelper;
+  String returnURL = 'return.example.com';
+  String cancelURL = 'cancel.example.com';
+
+  @override
+  void initState() {
+    super.initState();
+    paymentMethod = StorageHelper.getPaymentMethod();
+    _payPalPaymentHelper = PayPalPaymentHelper();
+  }
+
+  Future execute() async {
+
+    accessToken = (await _payPalPaymentHelper.getAccessToken());
+
+    try {
+
+      final transactions = getOrderParams();
+      final res = await _payPalPaymentHelper.createPaypalPayment(transactions, accessToken);
+      if (res != null) {
+        setState(() {
+          checkoutUrl = res["approvalUrl"];
+          executeUrl = res["executeUrl"];
+        });
+      }
+
+    } catch (ex) {
+      print("Paypal error $ex");
+    }
+  }
+
+  Map<String, dynamic> getOrderParams() {
+    List items = [
+      {
+        "name": "itemName",
+        "quantity": "10",  // Quantity as a string
+        "unit_price": "100.00",  // Use `unit_price` instead of `price`
+        "currency": "USD"
+      }
+    ];
+
+    // Checkout Invoice Specifics
+    String totalAmount = '100.00';
+    String subTotalAmount = '100.00';
+    String shippingCost = '0.00';
+    String shippingDiscountCost = "0.00";  // Positive value
+    String userFirstName = 'john';
+    String userLastName = 'smith';
+    String addressCity = 'New York';
+    String addressStreet = "123 Main St";
+    String addressZipCode = '10001';
+    String addressCountry = 'US';
+    String addressState = 'NY';
+    String addressPhoneNumber = '+1 223 6161 789';
+
+    Map<String, dynamic> temp = {
+      "intent": "sale",
+      "payer": {"payment_method": "paypal"},
+      "transactions": [
+        {
+          "amount": {
+            "total": totalAmount,
+            "currency": "USD",
+            "details": {
+              "subtotal": subTotalAmount,
+              "shipping": shippingCost,
+              "shipping_discount": shippingDiscountCost
+            }
+          },
+          "description": "The payment transaction description.",
+          "payment_options": {
+            "allowed_payment_method": "INSTANT_FUNDING_SOURCE"
+          },
+          "item_list": {
+            "items": items,
+            "shipping_address": {
+              "recipient_name": "$userFirstName $userLastName",
+              "line1": addressStreet,
+              "line2": "",
+              "city": addressCity,
+              "country_code": addressCountry,
+              "postal_code": addressZipCode,
+              "phone": addressPhoneNumber,
+              "state": addressState
+            }
+          }
+        }
+      ],
+      "note_to_payer": "Contact us for any questions on your order.",
+      "redirect_urls": {
+        "return_url": returnURL,
+        "cancel_url": cancelURL
+      }
+    };
+
+    return temp;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -101,26 +210,46 @@ class _CartPageState extends State<CartPage> {
                               const Divider(),
                               _buildListView(context, list),
                               const Divider(),
-                              Row(
-                                children: [
-                                  BlocBuilder<ProductBloc, AppState>(
-                                    buildWhen: (context,state){
-                                      return state is GetTotalPriceState;
-                                    },
-                                    builder: (context,state){
-                                      var totalPrice = (state as GetTotalPriceState).totalPrice;
-                                      return  Text(
-                                        '${LocaleKeys.due.tr()} : $totalPrice',
+                              BlocBuilder<ProductBloc,AppState>(
+                                buildWhen: (context,state){
+                                  return state is GetTotalPriceState;
+                                },
+                                builder: (context,state){
+                                  var totalPrice = (state as GetTotalPriceState).totalPrice;
+                                  return Row(
+                                    children: [
+                                      Text(
+                                        '${LocaleKeys.due.tr()} : ${totalPrice.toStringAsFixed(2)}',
                                         style: Utils.getBold().copyWith(fontSize: 20),
-                                      );
-                                    },
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    LocaleKeys.checkout.tr(),
-                                    style: Utils.getBold().copyWith(fontSize: 20),
-                                  ),
-                                ],
+                                      ),
+                                      const Spacer(),
+                                      GestureDetector(
+                                        onTap: () async {
+                                         print(paymentMethod);
+                                         if(paymentMethod == "Stripe"){
+
+                                           // stripe payment
+                                           Fluttertoast.showToast(msg: "Called");
+                                           Get.toNamed(AppRouting.paymentPage,arguments: { "due" : totalPrice });
+                                         } else {
+
+                                           await execute();
+                                           if(checkoutUrl != null){
+                                             // paypal payment
+                                             Fluttertoast.showToast(msg: 'Success');
+                                           } else {
+                                             Fluttertoast.showToast(msg: 'Failed to make payment');
+                                           }
+                                         }
+                                        },
+                                        child: Text(
+                                          LocaleKeys.checkout.tr(),
+                                          style: Utils.getBold().copyWith(fontSize: 20),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -207,7 +336,6 @@ class _CartPageState extends State<CartPage> {
       },
     );
   }
-
   Widget _buildListView(BuildContext context, List<StoreData> list) {
 
     var productBloc =  context.read<ProductBloc>();
@@ -227,10 +355,25 @@ class _CartPageState extends State<CartPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Row(
                 children: [
-                  Image.network(
-                    list[index].image!,
-                    width: 90,
-                    height: 90,
+                  Stack(
+                    children: [
+                      Image.network(
+                        list[index].image!,
+                        width: 90,
+                        height: 90,
+                      ),
+                      Positioned(
+                        right: 10,
+                        child: Container(
+                          width: 30,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Color(list[index].color!)
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -268,8 +411,6 @@ class _CartPageState extends State<CartPage> {
                             setState(() {
                               var quantity = list[index].quantity! + 1;
                               var totalPrice = list[index].price!  * quantity;
-
-
                                companion = StoreCompanion(
                                    id: d.Value(list[index].id),
                                   title: d.Value(list[index].title),
@@ -283,7 +424,6 @@ class _CartPageState extends State<CartPage> {
                               );
                             });
                             context.read<ProductBloc>().add(GetUpdateCartEvent(companion!));
-                            context.read<ProductBloc>().add(GetTotalPriceEvent());
                           },
                           child: Container(
                             width: 30,
@@ -310,8 +450,6 @@ class _CartPageState extends State<CartPage> {
                                 var quantity = list[index].quantity! - 1;
                                 var totalPrice = list[index].price!  * quantity;
 
-                                print("total " + totalPrice.toString());
-
                                 companion = StoreCompanion(
                                     id: d.Value(list[index].id),
                                     title: d.Value(list[index].title),
@@ -326,7 +464,6 @@ class _CartPageState extends State<CartPage> {
                               });
                             }
                             context.read<ProductBloc>().add(GetUpdateCartEvent(companion!));
-                            context.read<ProductBloc>().add(GetTotalPriceEvent());
                           },
                           child: Container(
                             width: 30,
@@ -349,4 +486,5 @@ class _CartPageState extends State<CartPage> {
       ),
     );
   }
+
 }

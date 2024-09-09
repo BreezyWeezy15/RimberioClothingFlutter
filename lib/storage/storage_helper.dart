@@ -20,4 +20,7 @@ class StorageHelper {
   static void setPaymentMethod(String value) => storage.write("payment", value);
   static String getPaymentMethod() => storage.read("payment") ?? "Stripe";
 
+  /// store shipping info
+  static void addShippingInfo(Map<String,dynamic> info) => storage.write("shipping", info);
+  static Map<String,dynamic> getShippingInfo() => storage.read("shipping") as Map<String,dynamic>;
 }

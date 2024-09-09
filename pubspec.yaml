@@ -56,6 +56,11 @@ dependencies:
   cached_network_image: ^3.4.0
   mailer: ^6.1.2
   easy_localization: ^3.0.7
+  custom_rating_bar: ^3.0.0
+  flutter_stripe: ^9.3.0
+  flutter_paypal: ^0.2.1
+  http_auth:
+  webview_flutter:
 
 dev_dependencies:
   flutter_test:

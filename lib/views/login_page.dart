@@ -40,8 +40,6 @@ class _LoginPageState extends State<LoginPage> {
           if(userCredentials?.user != null){
             setState(() {isLoading = false;});
             Fluttertoast.showToast(msg: 'Login Success');
-            _emailController.dispose();
-            _passWordController.dispose();
             Get.offNamed(AppRouting.homePage);
           } else {
             setState(() {isLoading = false;});

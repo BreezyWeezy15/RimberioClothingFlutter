@@ -3,10 +3,7 @@ import 'package:car_shop/auth/product_service.dart';
 import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
-import 'package:car_shop/bloc/product_bloc.dart';
-import 'package:car_shop/db/store_helper.dart';
-import 'package:car_shop/others/theme_helper.dart';
-import 'package:car_shop/others/utils.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:car_shop/routes/app_routing.dart';
 import 'package:car_shop/storage/storage_helper.dart';
 import 'package:car_shop/views/splash_page.dart';
@@ -41,9 +38,8 @@ Future<void> _initializeApp() async {
   await EasyLocalization.ensureInitialized();
   await dotenv.load();
   await GetStorage.init();
-
+  Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE'] ?? '';
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
