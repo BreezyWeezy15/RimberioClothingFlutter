@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rimberio-296b9",
+  "private_key_id": "4d6c679a3c2150bef81544e7e69e2334f8a71e8c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCOA+hnjtELfP52\nRSV1Pn+z1bdoBwbJ8du/gh1+OMU4Mw62gG+uBJs0pS4tDDO+HKKwsi2Euu6SQ+H8\n2PhjPGpeO4w3mLBeFnJsX9GNLGm69AxTiPj9LDJVCHrKniGVTKegUTeQ6uuj664T\n4fSQHGak77ZESCsj/qaNXgmBaSCgBKlcbyr0VUCLIkjtFC8lo3qaBOG2DH859HuK\ne6QrUN2ubtBGmFrcORRfPCB3vTYo0C51zJASL1JkvFr7rh609dKi9gX/JKrrfwiL\naFb4kZwDLFLAmojIEAe6HWf6R2qZnW6v+ituWeGAMyiZYvrgAVzkaF05vKtxiVqs\nnqC7qCTvAgMBAAECggEAA2FpKqr4I6iRm0rIrWFtg2A2SVgk8O0WB6puim29UsJh\n+pNubrtP8DnGfz+vRrICZ/BKp9Nrcr0kEF4gFvxgNloYuYloGRbcbuNA4sLolhDa\nAENzmQ6sK+mLIN3Msw1p1uF7PwgZFDMAGz3KEeof9RxHQ//4L7lk/GvjusTqsrrM\nVTyTgRp20U3WY8fjXSDgsT/Wsic+dl3QMwqcckp0/K0L9m4YwCrRdHWiUErCTynt\njoxzyifN7/R/5g0FBeE1u45sWC/rbUPkGZZOgFVVBWSR8HTfQX7Gu9Nt4phDTt2E\n4iM30xAbXKtec7GiT1oAQYc2/tXcRCmYi3xavfYfqQKBgQC/paW9HEMPsP/fCYU+\nhJv5cGCIR87bJO4pZQ6r5wP3yc7RVkINfeSMS2ZzYITjL59/1dInyBqanWVuZ129\nUeZMPcA3q7Hr+0soDPSdv+cFK6kc8nu/RYHnC8rDcsR19D+gd3M47zHGG/9iP8J8\n9TZRJP5jlaXLPTj/jRD56kqpiQKBgQC9s9Cs8CCwMrvBF/bbSFDnEx32EIME+xyq\ndJA9/JgQgnjH4cWUuYOkCF2vk0RYzl16UGCvHP4xmJZOicgDTx9oYbd14sRtNWDf\nhh1Ik8NhkjnUq6m+g+ang+uUyc4eNo0lRum1Ut3dT6hNsxtikHA7c7V79GmCpdEE\n889imWhUtwKBgCY1VkfPvKcCOOE0urXuJlKizvwcpOcYA8uI9FXdZvMd7vfZZK3f\n7ZLy7WgPVC8fLYOFE7MOuA8fVjuerBe0nl+Q6COxPXW40hEYFCTnP53OSJcW2QkX\nSIDR3wj8dqK1oYHSjsxJE/lVV6M05weWs8+VuooMKdPNTvHUJBBPX7dRAoGAJAC6\ne/fe3FHknFMGALwKzrAsIYUkuI9H83nH3lvQKGH6tkS9EOrcdwc3cJkMgaY4y3vx\nvYpNG/CPpjwz/5zGozLYdMEi8m8NAZ8cc6fHjv8HhrtFreiun+BDl6ttOQK1avu4\nYzdk8BmsIYL6kYxEIKRnLy1F0QvTTZNQKrBewqUCgYEAtsnYrEOKgb4Gy7X9CNcj\nj/0kiCwR6bmc6MtYN4zo1sZf6T51andj/1QXVXxnUp1HQbO0uN3seJAh/QhNTcnv\npbElweUYicSq0fTsQHvADE6CbRBgiNeHxvWU4PRHGIrUJ7KmceJEOY221s2FcYNK\nAEJ5DCzSsMuRlgS3jl1DzHQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "rimberio-296b9@appspot.gserviceaccount.com",
+  "client_id": "113265513099696352660",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/rimberio-296b9%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

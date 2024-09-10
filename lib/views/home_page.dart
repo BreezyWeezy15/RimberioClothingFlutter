@@ -9,14 +9,19 @@ import 'package:car_shop/db/store_helper.dart';
 import 'package:car_shop/json/locale_keys.g.dart';
 import 'package:car_shop/models/product.dart';
 import 'package:car_shop/models/user_model.dart';
+import 'package:car_shop/others/notification_helper.dart';
 import 'package:car_shop/others/utils.dart';
 import 'package:car_shop/routes/app_routing.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart' hide Trans;
+import 'package:permission_handler/permission_handler.dart';
+
+import '../main.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,10 +31,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+
   @override
   void initState() {
     super.initState();
-    // You can safely remove the event dispatching from initState
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
+      if (message.notification != null) {
+         notificationHelper.showNotification(title: message.notification!.title!,
+             body: message.notification!.body!);
+      }
+    });
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        notificationHelper.showNotification(title: message.notification!.title!,
+            body: message.notification!.body!);
+      }
+    });
+    _requestNotificationPermission();
+
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
   }
 
   @override
@@ -115,7 +143,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  
+
   _getData(BuildContext context){
     return BlocBuilder<AppBloc, AppState>(
       builder: (context, state) {
@@ -129,6 +157,17 @@ class _HomePageState extends State<HomePage> {
                 style: Utils.getMedium().copyWith(fontSize: 20),
               ),
               const Spacer(),
+              CircleAvatar(
+                radius: 17,
+                backgroundColor: Colors.grey.shade200,
+                child: IconButton(
+                  onPressed: () {
+                    Get.toNamed(AppRouting.ordersPage);
+                  },
+                  icon: const Icon(Icons.list_alt, size: 15),
+                ),
+              ),
+              const SizedBox(width: 10),
               CircleAvatar(
                 radius: 17,
                 backgroundColor: Colors.grey.shade200,
@@ -309,4 +348,5 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
 }

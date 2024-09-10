@@ -89,4 +89,6 @@ class ProductBloc extends Bloc<AppEvent,AppState> {
     emit(GetTotalPriceState(result));
   }
 
+
+
 }

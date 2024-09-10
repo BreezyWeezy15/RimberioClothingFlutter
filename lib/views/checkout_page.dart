@@ -1,15 +1,21 @@
+import 'package:car_shop/auth/api_service.dart';
 import 'package:car_shop/auth/product_service.dart';
+import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
 import 'package:car_shop/bloc/product_bloc.dart';
 import 'package:car_shop/components/custom_container.dart';
 import 'package:car_shop/db/store_helper.dart';
+import 'package:car_shop/others/fcm_helper.dart';
 import 'package:car_shop/others/utils.dart';
 import 'package:car_shop/routes/app_routing.dart';
 import 'package:car_shop/storage/storage_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -21,50 +27,114 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
 
-
-
+  final FcmHelper _fcmHelper = FcmHelper();
+  var totalPrice = 0.0;
+  var isLoading = false;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ProductBloc(ProductService(), StoreHelper()),
-      child: Builder(
-        builder: (context){
-          WidgetsBinding.instance.addPostFrameCallback((_){
-            context.read<ProductBloc>().add(GetCartItemsEvent());
-          });
-          return SafeArea(
+    return MultiBlocProvider(
+        providers: [
+       BlocProvider(create: (_) => ProductBloc(ProductService(), StoreHelper())),
+       BlocProvider(create: (_) => AppBloc(AuthService()))
+    ],
+        child: Builder(
+      builder: (context){
+        WidgetsBinding.instance.addPostFrameCallback((_){
+          context.read<ProductBloc>().add(GetCartItemsEvent());
+          context.read<ProductBloc>().add(GetTotalPriceEvent());
+        });
+        return MultiBlocListener(
+          listeners: [
+            BlocListener<ProductBloc, AppState>(
+              listener: (context, state) {
+                if (state is GetTotalPriceState) {
+                  totalPrice = state.totalPrice;
+                }
+              },
+            ),
+            BlocListener<AppBloc, AppState>(
+              listener: (context, state) {
+                if (state is GetUploadInvoiceState) {
+                  bool isSuccess = state.isSuccess;
+                  if (isSuccess) {
+                    _sendFcmNotification();
+                    Fluttertoast.showToast(msg: 'All Done.');
+                    context.read<ProductBloc>().add(GetDeleteCartEvent());
+                    Get.offNamed(AppRouting.homePage);
+                  }
+                  else {
+
+                    Fluttertoast.showToast(msg: 'Failed to upload invoice${state.error}');
+                  }
+
+                  setState(() {
+                    isLoading = true;
+                  });
+                }
+              },
+            ),
+          ],
+          child: SafeArea(
             child: Scaffold(
-              body: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Text('Receipt',style: Utils.getBold().copyWith(fontSize: 30),),
-                    const Divider(),
-                    const SizedBox(height: 50,),
-                    BlocBuilder<ProductBloc,AppState>(
-                      builder: (context,state){
-                        if(state is GetCartItemsState){
-                          var data = state.data;
-                          return Text(getReceipt(data),style: Utils.getMedium().copyWith(fontSize: 15),);
-                        }
-                        return Container();
-                      },
-                    ),
-                    const SizedBox(height: 50,),
-                    CustomContainer(text: "Finsih Order", isLoading: false, onTap: (){
+              body: BlocBuilder<ProductBloc, AppState>(
+                buildWhen: (context,state){
+                  return state is GetCartItemsState;
+                },
+                builder: (context, state) {
+                  if (state is LOADING) {
+                    return const Center(
+                      child: SpinKitFadingCube(color: Colors.red, size: 25),
+                    );
+                  }
+                  else if (state is GetCartItemsState) {
+                    var data = state.data;
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Expanded(child: Column(
+                            children: [
+                              Text(
+                                'Receipt',
+                                style: Utils.getBold().copyWith(fontSize: 30),
+                              ),
+                              const Divider(),
+                              const SizedBox(height: 50),
+                              Text(
+                                getReceipt(data),
+                                style: Utils.getMedium().copyWith(fontSize: 15),
+                              ),
+                              const SizedBox(height: 50)
+                            ],
+                          )),
+                          CustomContainer(
+                            text: "Finish Order",
+                            isLoading: false,
+                            onTap: () {
 
-                      context.read<ProductBloc>().add(GetDeleteCartEvent());
-                      Get.offNamed(AppRouting.homePage);
+                              setState(() {
+                                isLoading = true;
+                              });
 
-                    })
-                  ],
-                ),
+                              context.read<AppBloc>().add(GetUploadInvoiceEvent(data, totalPrice.toString()));
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  else {
+                    return const Center(
+                      child: Text('No items in cart'),
+                    );
+                  }
+                },
               ),
             ),
-          );
-        },
-      ),
-    );
+          ),
+        );
+      },
+    ));
   }
 
   String getReceipt(List<StoreData> data){
@@ -108,19 +178,40 @@ class _CheckoutPageState extends State<CheckoutPage> {
     receipt.writeln('#Items');
     receipt.writeln();
 
-
     // Ordered Food
     for (var data in data) {
       receipt.writeln('x${data.quantity} ${data.title}');
     }
 
+
     receipt.writeln();
     receipt.writeln('----------------');
+    receipt.writeln('#TotalPrice $totalPrice');
     receipt.writeln();
+
+
     receipt.write("Thank you for shopping with us");
 
     return receipt.toString();
 
+
+  }
+
+  _sendFcmNotification() async {
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
+
+    print(token);
+
+   bool isSuccess = await _fcmHelper.sendPushMessage(recipientToken: token!, title: "shopping",
+        body: "Your order has been received,Thank you for shopping");
+
+   if(isSuccess){
+     Fluttertoast.showToast(msg: "Fcm successfully sent");
+   } else {
+     Fluttertoast.showToast(msg: 'Failed to send fcm');
+   }
 
   }
 }

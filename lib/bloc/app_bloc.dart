@@ -2,8 +2,10 @@
 
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
+import 'package:car_shop/models/order/order_model.dart';
 import 'package:car_shop/others/theme_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../auth/api_service.dart';
@@ -20,6 +22,8 @@ class AppBloc extends Bloc<AppEvent,AppState> {
     on<AuthEvent>((event, emit) => _getStatus(event, emit));
     on<UserInfoEvent>((event, emit) => _getUserInfo(event, emit));
     on<GetThemeEvent>((event, emit) => _changeTheme(event, emit));
+    on<GetUploadInvoiceEvent>((event,emit) => _uploadInvoice(event, emit));
+    on<GetOrdersEvent>((event,emit) => _getOrders(event, emit));
   }
 
   _loginUser(LoginEvent event,Emitter<AppState> emit) async {
@@ -79,6 +83,34 @@ class AppBloc extends Bloc<AppEvent,AppState> {
   _changeTheme(GetThemeEvent event,Emitter<AppState> emit) {
      ThemeMode themeMode = ThemeHelper.getTheme();
      emit(GetThemeState(themeMode));
+  }
+
+  _uploadInvoice(GetUploadInvoiceEvent event , Emitter<AppState> emit) async {
+    try {
+      await authService.uploadInvoice(event.list, event.totalPrice);
+      emit(GetUploadInvoiceState(true,"No Error"));
+    } catch(e){
+      emit(GetUploadInvoiceState(false,e.toString()));
+    }
+  }
+
+  _getOrders(GetOrdersEvent event, Emitter<AppState> emit) async {
+    try {
+      DataSnapshot dataSnapshot = await authService.getInvoices();
+      if (dataSnapshot.exists) {
+        List<OrderModel> orders = [];
+        for (var shot in dataSnapshot.children) {
+          var data = Map<String?, dynamic>.from(shot.value as Map);
+          OrderModel order = OrderModel.fromMap(data);
+          orders.add(order);
+        }
+        emit(GetInvoicesState(orders));
+      } else {
+        emit(ERROR("No orders found"));
+      }
+    } catch (e) {
+      emit(ERROR(e.toString()));
+    }
   }
 
 }

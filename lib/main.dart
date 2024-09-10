@@ -3,6 +3,8 @@ import 'package:car_shop/auth/product_service.dart';
 import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
+import 'package:car_shop/others/notification_helper.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:car_shop/routes/app_routing.dart';
 import 'package:car_shop/storage/storage_helper.dart';
@@ -16,6 +18,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 
+NotificationHelper notificationHelper = NotificationHelper.instance;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _initializeApp();
@@ -39,6 +42,14 @@ Future<void> _initializeApp() async {
   await dotenv.load();
   await GetStorage.init();
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE'] ?? '';
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  notificationHelper.initNotifications();
+
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  notificationHelper.showNotification(title: message.notification!.title!,
+      body: message.notification!.body!);
 }
 
 class MyApp extends StatefulWidget {

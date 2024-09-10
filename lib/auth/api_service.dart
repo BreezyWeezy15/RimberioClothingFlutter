@@ -2,13 +2,15 @@
 
 
 import 'dart:collection';
-
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import '../db/store_helper.dart';
 import '../models/user_model.dart';
 
 class AuthService {
+
 
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   FirebaseDatabase firebaseDatabase = FirebaseDatabase.instance;
@@ -69,6 +71,38 @@ class AuthService {
     } else {
       return null;
     }
+  }
+
+  //
+   uploadInvoice(List<StoreData> list, String totalPrice) async {
+    var invoiceID = DateTime.now().millisecondsSinceEpoch.toString();
+
+    DateFormat dateFormat = DateFormat();
+    String dateTime = dateFormat.format(DateTime.now());
+
+    var invoiceData = list.map((e) => e.toJson()).toList();
+
+    var invoiceMap = {
+      "data": invoiceData,
+      "invoiceID" : invoiceID,
+      "paid" : dateTime,
+      "userUid" : firebaseAuth.currentUser!.uid,
+      "totalPrice": totalPrice
+    };
+
+     await firebaseDatabase
+        .ref()
+        .child("Invoices")
+        .child(firebaseAuth.currentUser!.uid)
+        .child(invoiceID)
+        .set(invoiceMap);
+  }
+
+  Future<DataSnapshot> getInvoices() async {
+    return await firebaseDatabase
+        .ref()
+        .child("Invoices")
+        .child(firebaseAuth.currentUser!.uid).get();
   }
 
 }

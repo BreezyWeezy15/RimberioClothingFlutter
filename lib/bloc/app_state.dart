@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../db/store_helper.dart';
+import '../models/order/order_model.dart';
 import '../models/product.dart';
 
 abstract class AppState {}
@@ -95,4 +96,14 @@ class GetThemeState extends AppState {
   GetThemeState(this.themeMode);
 }
 
+class GetUploadInvoiceState extends AppState {
+  bool isSuccess;
+  String? error;
+  GetUploadInvoiceState(this.isSuccess,this.error);
+}
+
+class GetInvoicesState extends AppState {
+  List<OrderModel> list;
+  GetInvoicesState(this.list);
+}
 

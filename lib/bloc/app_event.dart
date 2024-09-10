@@ -88,3 +88,13 @@ class GetThemeEvent extends AppEvent {
   ThemeMode themeMode;
   GetThemeEvent(this.themeMode);
 }
+
+class GetUploadInvoiceEvent extends AppEvent {
+  List<StoreData> list;
+  String totalPrice;
+  GetUploadInvoiceEvent(this.list,this.totalPrice);
+}
+
+class GetOrdersEvent extends AppEvent {
+
+}
