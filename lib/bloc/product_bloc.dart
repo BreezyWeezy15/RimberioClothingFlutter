@@ -1,18 +1,14 @@
 
-
 import 'package:car_shop/bloc/app_event.dart';
-import 'package:car_shop/storage/storage_helper.dart';
+import 'package:car_shop/main.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../auth/product_service.dart';
 import '../db/store_helper.dart';
 import '../models/product.dart';
 import 'app_state.dart';
 
 class ProductBloc extends Bloc<AppEvent,AppState> {
 
-  StoreHelper storeHelper;
-  ProductService productService;
-  ProductBloc(this.productService,this.storeHelper) : super(INITIAL()){
+  ProductBloc() : super(INITIAL()){
 
     on<GetProductsEvent>((event,emit) => _getProducts(event, emit));
     on<GetProductEvent>((event,emit) => _getProduct(event, emit));

@@ -6,11 +6,11 @@ import 'package:car_shop/storage/storage_helper.dart';
 import 'package:drift/drift.dart' as d;
 import 'package:car_shop/json/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:car_shop/auth/product_service.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
 import 'package:car_shop/bloc/product_bloc.dart';
 import 'package:car_shop/others/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -42,98 +42,10 @@ class _CartPageState extends State<CartPage> {
     _payPalPaymentHelper = PayPalPaymentHelper();
   }
 
-  Future execute() async {
-
-    accessToken = (await _payPalPaymentHelper.getAccessToken());
-
-    try {
-
-      final transactions = getOrderParams();
-      final res = await _payPalPaymentHelper.createPaypalPayment(transactions, accessToken);
-      if (res != null) {
-        setState(() {
-          checkoutUrl = res["approvalUrl"];
-          executeUrl = res["executeUrl"];
-        });
-      }
-
-    } catch (ex) {
-      print("Paypal error $ex");
-    }
-  }
-
-  Map<String, dynamic> getOrderParams() {
-    List items = [
-      {
-        "name": "itemName",
-        "quantity": "10",  // Quantity as a string
-        "unit_price": "100.00",  // Use `unit_price` instead of `price`
-        "currency": "USD"
-      }
-    ];
-
-    // Checkout Invoice Specifics
-    String totalAmount = '100.00';
-    String subTotalAmount = '100.00';
-    String shippingCost = '0.00';
-    String shippingDiscountCost = "0.00";  // Positive value
-    String userFirstName = 'john';
-    String userLastName = 'smith';
-    String addressCity = 'New York';
-    String addressStreet = "123 Main St";
-    String addressZipCode = '10001';
-    String addressCountry = 'US';
-    String addressState = 'NY';
-    String addressPhoneNumber = '+1 223 6161 789';
-
-    Map<String, dynamic> temp = {
-      "intent": "sale",
-      "payer": {"payment_method": "paypal"},
-      "transactions": [
-        {
-          "amount": {
-            "total": totalAmount,
-            "currency": "USD",
-            "details": {
-              "subtotal": subTotalAmount,
-              "shipping": shippingCost,
-              "shipping_discount": shippingDiscountCost
-            }
-          },
-          "description": "The payment transaction description.",
-          "payment_options": {
-            "allowed_payment_method": "INSTANT_FUNDING_SOURCE"
-          },
-          "item_list": {
-            "items": items,
-            "shipping_address": {
-              "recipient_name": "$userFirstName $userLastName",
-              "line1": addressStreet,
-              "line2": "",
-              "city": addressCity,
-              "country_code": addressCountry,
-              "postal_code": addressZipCode,
-              "phone": addressPhoneNumber,
-              "state": addressState
-            }
-          }
-        }
-      ],
-      "note_to_payer": "Contact us for any questions on your order.",
-      "redirect_urls": {
-        "return_url": returnURL,
-        "cancel_url": cancelURL
-      }
-    };
-
-    return temp;
-  }
-
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ProductBloc(ProductService(), StoreHelper()),
+      create: (_) => ProductBloc(),
       child: BlocListener<ProductBloc, AppState>(
         listener: (context, state) {
           if (state is GetDeleteCartState) {
@@ -210,47 +122,7 @@ class _CartPageState extends State<CartPage> {
                               const Divider(),
                               _buildListView(context, list),
                               const Divider(),
-                              BlocBuilder<ProductBloc,AppState>(
-                                buildWhen: (context,state){
-                                  return state is GetTotalPriceState;
-                                },
-                                builder: (context,state){
-                                  var totalPrice = (state as GetTotalPriceState).totalPrice;
-                                  return Row(
-                                    children: [
-                                      Text(
-                                        '${LocaleKeys.due.tr()} : ${totalPrice.toStringAsFixed(2)}',
-                                        style: Utils.getBold().copyWith(fontSize: 20),
-                                      ),
-                                      const Spacer(),
-                                      GestureDetector(
-                                        onTap: () async {
-                                         print(paymentMethod);
-                                         if(paymentMethod == "Stripe"){
-
-                                           // stripe payment
-                                           Fluttertoast.showToast(msg: "Called");
-                                           Get.toNamed(AppRouting.paymentPage,arguments: { "due" : totalPrice });
-                                         } else {
-
-                                           await execute();
-                                           if(checkoutUrl != null){
-                                             // paypal payment
-                                             Fluttertoast.showToast(msg: 'Success');
-                                           } else {
-                                             Fluttertoast.showToast(msg: 'Failed to make payment');
-                                           }
-                                         }
-                                        },
-                                        child: Text(
-                                          LocaleKeys.checkout.tr(),
-                                          style: Utils.getBold().copyWith(fontSize: 20),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
+                              _buildDue(context),
                             ],
                           ),
                         );
@@ -485,6 +357,138 @@ class _CartPageState extends State<CartPage> {
         },
       ),
     );
+  }
+  Widget _buildDue(BuildContext context){
+    return BlocBuilder<ProductBloc,AppState>(
+      buildWhen: (context,state){
+        return state is GetTotalPriceState;
+      },
+      builder: (context,state){
+        var totalPrice = (state as GetTotalPriceState).totalPrice;
+        return Row(
+          children: [
+            Text(
+              '${LocaleKeys.due.tr()} : ${totalPrice.toStringAsFixed(2)}',
+              style: Utils.getBold().copyWith(fontSize: 20),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () async {
+                print(paymentMethod);
+                if(paymentMethod == "Stripe"){
+
+                  // stripe payment
+                  Fluttertoast.showToast(msg: "Called");
+                  Get.toNamed(AppRouting.paymentPage,arguments: { "due" : totalPrice });
+                } else {
+
+                  await execute();
+                  if(checkoutUrl != null){
+                    // paypal payment
+                    Fluttertoast.showToast(msg: 'Success');
+                  } else {
+                    Fluttertoast.showToast(msg: 'Failed to make payment');
+                  }
+                }
+              },
+              child: Text(
+                LocaleKeys.checkout.tr(),
+                style: Utils.getBold().copyWith(fontSize: 20),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // PAYPAL
+  Future execute() async {
+
+    accessToken = (await _payPalPaymentHelper.getAccessToken());
+
+    try {
+
+      final transactions = getOrderParams();
+      final res = await _payPalPaymentHelper.createPaypalPayment(transactions, accessToken);
+      if (res != null) {
+        setState(() {
+          checkoutUrl = res["approvalUrl"];
+          executeUrl = res["executeUrl"];
+        });
+      }
+
+    } catch (ex) {
+      if(kDebugMode){
+        print("Paypal error $ex");
+      }
+    }
+  }
+  Map<String, dynamic> getOrderParams() {
+    List items = [
+      {
+        "name": "itemName",
+        "quantity": "10",  // Quantity as a string
+        "unit_price": "100.00",  // Use `unit_price` instead of `price`
+        "currency": "USD"
+      }
+    ];
+
+    // Checkout Invoice Specifics
+    String totalAmount = '100.00';
+    String subTotalAmount = '100.00';
+    String shippingCost = '0.00';
+    String shippingDiscountCost = "0.00";  // Positive value
+    String userFirstName = 'john';
+    String userLastName = 'smith';
+    String addressCity = 'New York';
+    String addressStreet = "123 Main St";
+    String addressZipCode = '10001';
+    String addressCountry = 'US';
+    String addressState = 'NY';
+    String addressPhoneNumber = '+1 223 6161 789';
+
+    Map<String, dynamic> temp = {
+      "intent": "sale",
+      "payer": {"payment_method": "paypal"},
+      "transactions": [
+        {
+          "amount": {
+            "total": totalAmount,
+            "currency": "USD",
+            "details": {
+              "subtotal": subTotalAmount,
+              "shipping": shippingCost,
+              "shipping_discount": shippingDiscountCost
+            }
+          },
+          "description": "The payment transaction description.",
+          "payment_options": {
+            "allowed_payment_method": "INSTANT_FUNDING_SOURCE"
+          },
+          "item_list": {
+            "items": items,
+            "shipping_address": {
+              "recipient_name": "$userFirstName $userLastName",
+              "line1": addressStreet,
+              "line2": "",
+              "city": addressCity,
+              "country_code": addressCountry,
+              "postal_code": addressZipCode,
+              "phone": addressPhoneNumber,
+              "state": addressState
+            }
+          }
+        }
+      ],
+      "note_to_payer": "Contact us for any questions on your order.",
+      "redirect_urls": {
+        "return_url": returnURL,
+        "cancel_url": cancelURL
+      }
+    };
+
+    return temp;
   }
 
 }

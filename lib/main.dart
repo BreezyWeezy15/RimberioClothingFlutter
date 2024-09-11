@@ -3,6 +3,7 @@ import 'package:car_shop/auth/product_service.dart';
 import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
+import 'package:car_shop/db/store_helper.dart';
 import 'package:car_shop/others/notification_helper.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -19,7 +20,11 @@ import 'package:get_storage/get_storage.dart';
 
 
 NotificationHelper notificationHelper = NotificationHelper.instance;
+ProductService productService = ProductService.instance;
+StoreHelper storeHelper = StoreHelper.instance;
+AuthService authService = AuthService.instance;
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   await _initializeApp();
   runApp(EasyLocalization(
@@ -28,6 +33,7 @@ void main() async {
       fallbackLocale: const Locale("en"),
       child: const MyApp()));
 }
+
 
 Future<void> _initializeApp() async {
   await Firebase.initializeApp(
@@ -46,11 +52,11 @@ Future<void> _initializeApp() async {
   notificationHelper.initNotifications();
 
 }
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   notificationHelper.showNotification(title: message.notification!.title!,
       body: message.notification!.body!);
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -58,14 +64,13 @@ class MyApp extends StatefulWidget {
   @override
   State<MyApp> createState() => _MyAppState();
 }
-
 class _MyAppState extends State<MyApp> {
   late ThemeMode themeMode = ThemeMode.light;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AppBloc(AuthService()),
+      create: (_) => AppBloc(),
       child: BlocListener<AppBloc, AppState>(
         listenWhen: (context,state){
           return state is GetThemeState;

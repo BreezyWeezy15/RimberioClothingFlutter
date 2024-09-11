@@ -9,6 +9,7 @@ import 'package:car_shop/views/login_page.dart';
 import 'package:car_shop/views/orders_page.dart';
 import 'package:car_shop/views/password_page.dart';
 import 'package:car_shop/views/payment_page.dart';
+import 'package:car_shop/views/profile_page.dart';
 import 'package:car_shop/views/register_page.dart';
 import 'package:car_shop/views/settings_page.dart';
 import 'package:car_shop/views/splash_page.dart';
@@ -30,6 +31,7 @@ class AppRouting {
   static const String paymentPage = "/page";
   static const String checkOutPage = "/checkout";
   static const String ordersPage = "/orders";
+  static const String profilePage = "/profile";
 
   static List<GetPage> pages  = [
     GetPage(name: splashPage, page: () => const SplashPage()),
@@ -43,7 +45,8 @@ class AppRouting {
     GetPage(name: settingsPage, page: () => const SettingsPage()),
     GetPage(name: paymentPage, page: () => const PaymentPage()),
     GetPage(name: checkOutPage, page: () => const CheckoutPage()),
-    GetPage(name: ordersPage, page: () => const OrdersPage())
+    GetPage(name: ordersPage, page: () => const OrdersPage()),
+    GetPage(name: profilePage, page: () => const ProfilePage())
   ];
 
 }

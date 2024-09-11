@@ -1,5 +1,4 @@
 import 'dart:ffi';
-import 'package:car_shop/auth/product_service.dart';
 import 'package:car_shop/json/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/widgets.dart';
@@ -18,8 +17,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart' hide Trans;
 
-import '../models/product.dart';
-
 class DetailsPage extends StatefulWidget {
   const DetailsPage({super.key});
 
@@ -33,11 +30,10 @@ class _DetailsPageState extends State<DetailsPage> {
   int quantity = 0;
   int colorIndex = 0;
 
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ProductBloc(ProductService(), StoreHelper()),
+      create: (_) => ProductBloc(),
       child: BlocListener<ProductBloc,AppState>(
         listener: (context,state){
           if(state is GetSaveCartState){
@@ -150,7 +146,6 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
   }
-
   _buildPayment(BuildContext context,Product product){
     return  Positioned(
       bottom: 0,
@@ -248,4 +243,5 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
   }
+
 }

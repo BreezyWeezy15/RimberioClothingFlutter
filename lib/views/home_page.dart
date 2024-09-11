@@ -32,6 +32,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  var totalItems = 0;
 
   @override
   void initState() {
@@ -64,77 +65,91 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            Get.toNamed(AppRouting.settingsPage);
+          },
+          backgroundColor: Colors.blueGrey,
+          child: const Icon(Icons.settings,size: 25,color: Colors.white,),
+        ),
         body: Padding(
           padding: const EdgeInsets.all(20),
           child: MultiBlocProvider(
             providers: [
-              BlocProvider(create: (_) => AppBloc(AuthService())),
-              BlocProvider(create: (_) => ProductBloc(ProductService(), StoreHelper())),
+              BlocProvider(create: (_) => AppBloc()),
+              BlocProvider(create: (_) => ProductBloc()),
             ],
             child: Builder(
               builder: (context) {
                 // Schedule the event dispatch after the widget tree has been built
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  BlocProvider.of<AppBloc>(context).add(UserInfoEvent());
-                  BlocProvider.of<ProductBloc>(context).add(GetProductsEvent("electronics"));
+                  context.read<AppBloc>().add(UserInfoEvent());
+                  context.read<ProductBloc>().add(GetCartItemsEvent());
+                  context.read<ProductBloc>().add(GetProductsEvent("electronics"));
                 });
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _getData(context),
-                    const Divider(),
-                    const SizedBox(height: 25),
-                    _buildCarousel(context),
-                    const SizedBox(height: 20),
-                    Text(
-                      LocaleKeys.categories.tr(),
-                      style: Utils.getBold().copyWith(fontSize: 20),
-                    ),
-                    const SizedBox(height: 20),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: List.generate(Utils.categories.length, (index) {
-                          return GestureDetector(
-                            onTap: () {
-                              BlocProvider.of<ProductBloc>(context).add(
-                                  GetProductsEvent(Utils.categoriesNames[index].toLowerCase()));
-                            },
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(color: Colors.black87),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: Center(
-                                        child: Image.asset(
-                                          Utils.categories[index],
-                                          width: 40,
-                                          height: 40,
+                return BlocListener<ProductBloc, AppState>(
+                  listener: (context,state){
+                    if(state is GetCartItemsState){
+                      totalItems = state.data.length;
+                    }
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _getData(context),
+                      const Divider(),
+                      const SizedBox(height: 25),
+                      _buildCarousel(context),
+                      const SizedBox(height: 20),
+                      Text(
+                        LocaleKeys.categories.tr(),
+                        style: Utils.getBold().copyWith(fontSize: 20),
+                      ),
+                      const SizedBox(height: 20),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: List.generate(Utils.categories.length, (index) {
+                            return GestureDetector(
+                              onTap: () {
+                                BlocProvider.of<ProductBloc>(context).add(
+                                    GetProductsEvent(Utils.categoriesNames[index].toLowerCase()));
+                              },
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: Colors.black87),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: Center(
+                                          child: Image.asset(
+                                            Utils.categories[index],
+                                            width: 40,
+                                            height: 40,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Text(Utils.categoriesNames[index].capitalize!),
-                                  ],
+                                      const SizedBox(width: 10),
+                                      Text(Utils.categoriesNames[index].capitalize!),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        }),
+                            );
+                          }),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _showData(context),
-                  ],
+                      const SizedBox(height: 20),
+                      _showData(context),
+                    ],
+                  ),
                 );
               },
             ),
@@ -168,20 +183,37 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(width: 10),
-              CircleAvatar(
-                radius: 17,
-                backgroundColor: Colors.grey.shade200,
-                child: IconButton(
-                  onPressed: () {
-                    Get.toNamed(AppRouting.cartPage);
-                  },
-                  icon: const Icon(Icons.add_shopping_cart_outlined, size: 15),
-                ),
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 17,
+                    backgroundColor: Colors.grey.shade200,
+                    child: IconButton(
+                      onPressed: () {
+                        Get.toNamed(AppRouting.cartPage);
+                      },
+                      icon: const Icon(Icons.add_shopping_cart_outlined, size: 15),
+                    ),
+                  ),
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red
+                      ),
+                      child: Center(child: Text(totalItems.toString(),style: Utils.getBold().copyWith(fontSize: 8,color: Colors.white),)),
+                    ),
+                  )
+                ],
               ),
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  Get.toNamed(AppRouting.settingsPage);
+                  Get.toNamed(AppRouting.profilePage);
                 },
                 child: CircleAvatar(
                   radius: 15,

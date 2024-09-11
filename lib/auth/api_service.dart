@@ -1,6 +1,4 @@
 
-
-
 import 'dart:collection';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,24 +9,20 @@ import '../models/user_model.dart';
 
 class AuthService {
 
+  AuthService._privateConstructor();
+  static AuthService instance = AuthService._privateConstructor();
 
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   FirebaseDatabase firebaseDatabase = FirebaseDatabase.instance;
 
 
-  // login user
   Future<UserCredential?> loginUser(String email , String password) async {
     return await firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
   }
-
-  // register user
   Future<UserCredential?> registerUser(String email,String password) async {
     return await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
   }
-
-  // register user
-  Future createAccount(String fullName , String phone,
-      String email , String address) async {
+  Future createAccount(String fullName , String phone, String email , String address) async {
 
     var map = HashMap();
     map['fullName'] = fullName;
@@ -40,17 +34,12 @@ class AuthService {
 
     return await firebaseDatabase.ref().child('Users').child(firebaseAuth.currentUser!.uid).set(map);
   }
-
-   // reset pass
   Future<void> resetPass(String email) async {
       return await firebaseAuth.sendPasswordResetEmail(email: email);
   }
-
   User? userStatus(){
     return firebaseAuth.currentUser;
   }
-
-
   Future<UserModel?> getUser() async {
     final snapshot = await firebaseDatabase
         .ref()
@@ -72,9 +61,7 @@ class AuthService {
       return null;
     }
   }
-
-  //
-   uploadInvoice(List<StoreData> list, String totalPrice) async {
+  uploadInvoice(List<StoreData> list, String totalPrice) async {
     var invoiceID = DateTime.now().millisecondsSinceEpoch.toString();
 
     DateFormat dateFormat = DateFormat();
@@ -97,7 +84,6 @@ class AuthService {
         .child(invoiceID)
         .set(invoiceMap);
   }
-
   Future<DataSnapshot> getInvoices() async {
     return await firebaseDatabase
         .ref()

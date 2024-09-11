@@ -2,6 +2,7 @@
 
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
+import 'package:car_shop/main.dart';
 import 'package:car_shop/models/order/order_model.dart';
 import 'package:car_shop/others/theme_helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,9 +13,7 @@ import '../auth/api_service.dart';
 
 class AppBloc extends Bloc<AppEvent,AppState> {
 
-
-  AuthService authService;
-  AppBloc(this.authService) : super(INITIAL()){
+  AppBloc() : super(INITIAL()){
     on<LoginEvent>((event, emit) => _loginUser(event, emit));
     on<RegisterEvent>((event, emit) => _registerUser(event, emit));
     on<AccountEvent>((event, emit) => _createAccount(event, emit));
@@ -79,7 +78,6 @@ class AppBloc extends Bloc<AppEvent,AppState> {
   }
 
 
-  //
   _changeTheme(GetThemeEvent event,Emitter<AppState> emit) {
      ThemeMode themeMode = ThemeHelper.getTheme();
      emit(GetThemeState(themeMode));

@@ -5,6 +5,7 @@ import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
 import 'package:car_shop/bloc/product_bloc.dart';
+import 'package:car_shop/main.dart';
 import 'package:car_shop/others/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +22,7 @@ class _OrdersPageState extends State<OrdersPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => AppBloc(AuthService()),
+      create: (BuildContext context) => AppBloc(),
       child: Builder(
         builder: (context){
 

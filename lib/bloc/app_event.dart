@@ -83,7 +83,6 @@ class GetTotalPriceEvent extends AppEvent {
 
 }
 
-///////
 class GetThemeEvent extends AppEvent {
   ThemeMode themeMode;
   GetThemeEvent(this.themeMode);

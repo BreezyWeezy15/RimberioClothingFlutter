@@ -13,12 +13,8 @@ class StoreHelper extends _$StoreHelper {
   StoreHelper._internal() : super(_openConnection());
 
   // Singleton instance
-  static final StoreHelper _instance = StoreHelper._internal();
+  static final StoreHelper instance = StoreHelper._internal();
 
-  // Factory constructor that returns the singleton instance
-  factory StoreHelper() {
-    return _instance;
-  }
 
   @override
   int get schemaVersion => 1;

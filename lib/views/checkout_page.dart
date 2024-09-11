@@ -1,5 +1,4 @@
-import 'package:car_shop/auth/api_service.dart';
-import 'package:car_shop/auth/product_service.dart';
+
 import 'package:car_shop/bloc/app_bloc.dart';
 import 'package:car_shop/bloc/app_event.dart';
 import 'package:car_shop/bloc/app_state.dart';
@@ -12,6 +11,7 @@ import 'package:car_shop/routes/app_routing.dart';
 import 'package:car_shop/storage/storage_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -30,12 +30,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final FcmHelper _fcmHelper = FcmHelper();
   var totalPrice = 0.0;
   var isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
-       BlocProvider(create: (_) => ProductBloc(ProductService(), StoreHelper())),
-       BlocProvider(create: (_) => AppBloc(AuthService()))
+       BlocProvider(create: (_) => ProductBloc()),
+       BlocProvider(create: (_) => AppBloc())
     ],
         child: Builder(
       builder: (context){
@@ -196,13 +197,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
 
   }
-
   _sendFcmNotification() async {
 
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? token = await messaging.getToken();
 
-    print(token);
+    if(kDebugMode){
+      print(token);
+    }
 
    bool isSuccess = await _fcmHelper.sendPushMessage(recipientToken: token!, title: "shopping",
         body: "Your order has been received,Thank you for shopping");
@@ -214,4 +216,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
    }
 
   }
+
+
 }
